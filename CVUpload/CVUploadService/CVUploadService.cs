@@ -33,17 +33,17 @@ namespace CVUploadService
             CreateLogDirectory(UploadLogFile);
 
             //InitializeComponents();
-            
+
 
         }
 
         private void CreateLogDirectory(string uploadLogFile)
         {
 
-            int index = uploadLogFile.LastIndexOf("Logs") ;
-            if(index > 0)
+            int index = uploadLogFile.LastIndexOf("Logs");
+            if (index > 0)
             {
-                uploadLogFile = uploadLogFile.Substring(0, index+5);
+                uploadLogFile = uploadLogFile.Substring(0, index + 5);
             }
             if (!Directory.Exists(uploadLogFile))
                 Directory.CreateDirectory(uploadLogFile);
@@ -53,29 +53,52 @@ namespace CVUploadService
 
         protected override void OnStart(string[] args)
         {
-            _logger.Log("Service started", @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+            try
+            {
+                _logger.Log("Service started", @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
 
-            InitializeComponents();
+                InitializeComponents();
+            }
+            catch (Exception ex)
+            {
+                _logger.Log("Service Exception Occured in OnStart" + ex.Message, @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+
+            }
         }
 
 
         private void InitializeComponents()
         {
+            try
+            {
+                var timerInterVal = Convert.ToInt32(_iArmRepo.GetFileLocation(0));// int.Parse(ConfigurationManager.AppSettings["timeInterVal"]);
+                _timer.AutoReset = true;
+                _timer.Interval = timerInterVal;
+                _timer.Enabled = true;
+                _timer.Start();
+                _timer.Elapsed += (new FileParser()).FileParse;
+            }
+            catch (Exception ex)
+            {
+                _logger.Log("Service Exception Occured in InitializeComponents" + ex.Message, @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
 
-            var timerInterVal = Convert.ToInt32(_iArmRepo.GetFileLocation(0));// int.Parse(ConfigurationManager.AppSettings["timeInterVal"]);
-            _timer.AutoReset = true;
-            _timer.Interval = timerInterVal;
-            _timer.Enabled = true;
-            _timer.Start();
-            _timer.Elapsed += (new FileParser()).FileParse;
+            }
         }
 
 
         protected override void OnStop()
         {
-            _timer.Enabled = false;
-            _timer.Stop();
-            _logger.Log("Service stopped", @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+            try
+            {
+                _timer.Enabled = false;
+                _timer.Stop();
+                _logger.Log("Service stopped", @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+            }
+            catch (Exception ex)
+            {
+                _logger.Log("Service Exception Occured in OnStop" + ex.Message, @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+
+            }
 
         }
 
