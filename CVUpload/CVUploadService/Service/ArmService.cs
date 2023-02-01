@@ -25,6 +25,8 @@ namespace CVUploadService
                 return "";
             if (Path.GetExtension(physicalFile) == ".xlsx")
                 return "";
+            if (Path.GetExtension(physicalFile) == ".xls")
+                return "";
             if (Path.GetExtension(physicalFile) == ".txt")
                 return "";
             return "Invalid file";
