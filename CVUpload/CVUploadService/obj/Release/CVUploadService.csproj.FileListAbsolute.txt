@@ -100,4 +100,3 @@ E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadSe
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.csproj.CopyComplete
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.exe
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.pdb
-E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.csprojAssemblyReference.cache

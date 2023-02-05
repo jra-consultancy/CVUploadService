@@ -1,0 +1,13 @@
+﻿Installing assembly 'E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Release\CVUploadService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Release\CVUploadService.InstallLog
+   assemblypath = E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Release\CVUploadService.exe
+Installing service CV Upload Service...
+Service CV Upload Service has been successfully installed.
+Creating EventLog source CV Upload Service in log Application...
+Committing assembly 'E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Release\CVUploadService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Release\CVUploadService.InstallLog
+   assemblypath = E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Release\CVUploadService.exe
