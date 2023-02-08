@@ -263,6 +263,7 @@ namespace CVUploadService
         {
             try
             {
+                DataTable dt;
                 string isValid = "";
                 UploadQueue = _iArmRepo.GetFileLocation(1);
                 if (!UploadQueue.EndsWith("\\"))
@@ -296,7 +297,15 @@ namespace CVUploadService
                     isValid = _iArmService.IsValidFile(path);
                     if (isValid == "" || isValid == string.Empty)
                     {
-                        DataTable dt = GetFileData(file.Key, file.Value);
+                        if (new System.IO.FileInfo(path).Length > 1000000000)
+                        {
+                            dt = GetDataTableWithHeader(path);
+                        }
+                        else
+                        {
+                            dt = GetFileData(file.Key, file.Value);
+                        }
+                        //
                         _logger.Log("File converted to Datatable Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
                         if (dt != null)
                         {
@@ -313,8 +322,16 @@ namespace CVUploadService
 
                                 if (result == 1)
                                 {
-                                    result = _iArmRepo.AddBulkData(dt, Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
-                                    _logger.Log("Insert Bulk Data Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                                    if (new System.IO.FileInfo(path).Length > 1000000000)
+                                    {
+                                        //dt = GetDataTableWithHeader(path);
+                                        result = _iArmRepo.AddBulkDataForLargeFile(path, Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
+                                    }
+                                    else
+                                    {
+                                        result = _iArmRepo.AddBulkData(dt, Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
+                                        _logger.Log("Bulk Data Insert Successfully!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                                    }
 
                                     if (result == 1)
                                     {
@@ -343,6 +360,10 @@ namespace CVUploadService
                                             }
                                         }
                                     }
+                                    else
+                                    {
+                                        _logger.Log("Bulk Data Insert Failed!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                                    }
 
                                 }
 
@@ -360,8 +381,16 @@ namespace CVUploadService
 
                                 if (result == 1)
                                 {
-                                    _iArmRepo.AddBulkData(dt, Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
-                                    _logger.Log("Bulk Data Insert Successfully!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                                    if (new System.IO.FileInfo(path).Length > 1000000000)
+                                    {
+                                        dt = GetDataTableWithHeader(path);
+                                        _iArmRepo.AddBulkDataForLargeFile(path, Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
+                                    }
+                                    else
+                                    {
+                                        _iArmRepo.AddBulkData(dt, Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
+                                        _logger.Log("Bulk Data Insert Successfully!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                                    }
 
                                     if (result == 1)
                                     {
@@ -426,6 +455,23 @@ namespace CVUploadService
             }
 
 
+        }
+
+        private DataTable GetDataTableWithHeader(string path)
+        {
+            using (StreamReader sr = new StreamReader(path))
+            {
+                // Read the headers from the CSV file
+                string[] headers = sr.ReadLine().Split(',');
+
+                // Create the DataTable to hold the data
+                DataTable dataTable = new DataTable();
+                foreach (string header in headers)
+                {
+                    dataTable.Columns.Add(header);
+                }
+                return dataTable;
+            }
         }
 
         private void DeleteFilesFromFolder(Dictionary<string, Stream> stringData)
@@ -581,7 +627,8 @@ namespace CVUploadService
                 {
                     //return CSVToDataTable(UploadQueue + key);
 
-                    dt = CSVtoDataTable(UploadQueue + key);
+                    //dt = CSVtoDataTable(UploadQueue + key);
+                    dt = GetDataTableFromCSVFile(UploadQueue + key);
                     foreach (DataColumn col in dt.Columns)
                     {
                         col.ColumnName = col.ColumnName.Trim();
@@ -643,6 +690,38 @@ namespace CVUploadService
             }
 
         }
+        private static DataTable GetDataTableFromCSVFile(string filePath)
+        {
+            try
+            {
+                DataTable dataTable = new DataTable();
+                using (StreamReader sr = new StreamReader(filePath))
+                {
+                    string[] headers = sr.ReadLine().Split(',');
+                    foreach (string header in headers)
+                    {
+                        dataTable.Columns.Add(header);
+                    }
+                    while (!sr.EndOfStream)
+                    {
+                        string[] rows = sr.ReadLine().Split(',');
+                        DataRow dr = dataTable.NewRow();
+                        for (int i = 0; i < headers.Length; i++)
+                        {
+                            dr[i] = rows[i];
+                        }
+                        dataTable.Rows.Add(dr);
+                    }
+                }
+                return dataTable;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
         public DataTable CSVtoDataTable(string inputpath)
         {
 

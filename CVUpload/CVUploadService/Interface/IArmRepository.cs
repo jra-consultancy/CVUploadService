@@ -20,6 +20,6 @@ namespace CVUploadService
         int InsertDestinationTable(string insertSql);
         string GetDestinationTableName(string sourceTableName);
         int TruncateTable(string TableName);
-
+        int AddBulkDataForLargeFile(string path, string v);
     }
 }

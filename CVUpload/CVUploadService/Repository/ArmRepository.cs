@@ -103,6 +103,88 @@ namespace CVUploadService
 
 
         }
+        public int AddBulkDataForLargeFile(string path, string tableName)
+        {
+            try
+            {
+                //DataTable dtSource = new DataTable();
+                //string sourceTableQuery = "Select top 1 * from [" + temTableNamePrefix1 + tableName + "]";
+                //using (SqlCommand cmd = new SqlCommand(sourceTableQuery, _connectionDB.con))
+                //{
+                //    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                //    {
+                //        da.Fill(dtSource);
+                //    }
+                //}
+                _connectionDB.con.Open();
+                using (SqlBulkCopy bulk = new SqlBulkCopy(_connectionDB.con) { DestinationTableName = "[" + temTableNamePrefix1 + tableName + "]", BatchSize = 500000000, BulkCopyTimeout = 0 })
+                {
+                    bulk.DestinationTableName = "[" + temTableNamePrefix1 + tableName + "]";
+
+                    using (StreamReader sr = new StreamReader(path))
+                    {
+                        // Read the headers from the CSV file
+                        string[] headers = sr.ReadLine().Split(',');
+
+                        // Create the DataTable to hold the data
+                        DataTable dataTable = new DataTable();
+                        foreach (string header in headers)
+                        {
+                            dataTable.Columns.Add(header);
+                        }
+
+                        // Read the data from the CSV file in chunks and insert it into the database
+                        while (!sr.EndOfStream)
+                        {
+                            for (int i = 0; i < 1000; i++)
+                            {
+                                if (sr.EndOfStream)
+                                {
+                                    break;
+                                }
+                                string[] rows = sr.ReadLine().Split(',');
+                                DataRow dr = dataTable.NewRow();
+                                for (int j = 0; j < headers.Length; j++)
+                                {
+                                    dr[j] = rows[j];
+                                }
+                                dataTable.Rows.Add(dr);
+                            }
+
+                            bulk.WriteToServer(dataTable);
+                            dataTable.Clear();
+                        }
+                    }
+                }
+                    _connectionDB.con.Close();
+                //using (SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(_connectionDB.con))
+                //{
+                //    //Set the database table name.  
+                //    sqlBulkCopy.DestinationTableName = temTableNamePrefix + tableName;
+                //    sqlBulkCopy.BulkCopyTimeout = 0;
+                //    _connectionDB.con.Open();
+                //    sqlBulkCopy.WriteToServer(dt);
+                //    _connectionDB.con.Close();
+                //}
+
+                    return 1;
+            }
+            catch (Exception ex)
+            {
+                _logger.Log("AddBulkData Exception: " + ex.Message + " Table Name/FileName " + tableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //throw ex;
+                return -1;
+            }
+            finally
+            {
+                if (_connectionDB.con.State == System.Data.ConnectionState.Open)
+                {
+                    _connectionDB.con.Close();
+                }
+            }
+
+
+        }
 
         public int CheckTableExists(string Tablename)
         {

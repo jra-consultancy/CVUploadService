@@ -66,6 +66,10 @@ D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadServic
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.CopyComplete
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.exe
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.pdb
+E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.CVUploadService.resources
+E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.ProjectInstaller.resources
+E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.GenerateResource.cache
+E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.CoreCompileInputs.cache
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Debug\CVUploadService.exe.config
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Debug\CVUploadService.exe
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Debug\CVUploadService.pdb
@@ -92,11 +96,6 @@ E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Debug\System.Memor
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Debug\System.Numerics.Vectors.xml
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Debug\System.Threading.Tasks.Extensions.xml
-E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csprojAssemblyReference.cache
-E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.CVUploadService.resources
-E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.ProjectInstaller.resources
-E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.GenerateResource.cache
-E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.CoreCompileInputs.cache
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.CopyComplete
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.exe
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.pdb
