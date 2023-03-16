@@ -15,6 +15,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace CVUploadService
 {
@@ -32,6 +33,7 @@ namespace CVUploadService
         private string temTableNamePrefix2 = "TMP_";
         private string UploadLogFile = "";
         private string RejectedFile = "";
+        private string serviceName = "CV Upload Service";
 
         public FileParser()
         {
@@ -63,6 +65,8 @@ namespace CVUploadService
             if (!Monitor.TryEnter(Mylock, 0)) return;
             try
             {
+                string version = GetServiceVersion(serviceName);
+                _iArmRepo.InsertVersionNoIfNotFound(version);
                 string isValid = "";
                 UploadQueue = _iArmRepo.GetFileLocation(1);
                 if (!UploadQueue.EndsWith("\\"))
@@ -787,6 +791,13 @@ namespace CVUploadService
 
             }
             return csvdt;
+        }
+        private string GetServiceVersion(string serviceName)
+        {
+
+            // Get the service controller for the specified service name
+            Version serviceVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            return serviceVersion.ToString();
         }
     }
 }

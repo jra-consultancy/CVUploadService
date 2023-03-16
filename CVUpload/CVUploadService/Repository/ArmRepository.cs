@@ -27,6 +27,8 @@ namespace CVUploadService
         private string UploadCompletePath = "";
         private string UploadLogFile = "";
         private string defaultSchema = "dbo.";
+        private string CvVersion = "CvUploader_version";
+        private string CvVersionTime = "CvUploader_InstalledDate";
         public ArmRepository()
         {
             _logger = Logger.GetInstance;
@@ -512,6 +514,70 @@ namespace CVUploadService
                 _logger.Log("TruncateTable Exception: " + ex.Message + " Table Name/FileName: " + TableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
                 //throw ex;
                 return -1;
+            }
+            finally
+            {
+                if (_connectionDB.con.State == System.Data.ConnectionState.Open)
+                {
+                    _connectionDB.con.Close();
+                }
+            }
+        }
+        public void InsertVersionNoIfNotFound(string versionNo)
+        {
+            string sourceTableQuery = "select [dbo].[fnGlobalProperty](@propertyName) AS PropertyValue";
+
+            string version;
+            try
+            {
+                _connectionDB.con.Open();
+                using (SqlCommand cmd = new SqlCommand(sourceTableQuery, _connectionDB.con))
+                {
+                    cmd.Parameters.AddWithValue("@propertyName", CvVersion);
+                    object result = cmd.ExecuteScalar();
+                    if (result == DBNull.Value || result == "")
+                    {
+                        version = null;
+                    }
+                    else
+                    {
+                        version = (string)result;
+                    }
+                }
+                _connectionDB.con.Close();
+                if (String.IsNullOrEmpty(version))
+                {
+                    string sql = "UPDATE [dbo].[SystemGlobalProperties] SET PropertyValue = @versionNo WHERE PropertyName = @propertyName";
+                    _connectionDB.con.Open();
+                    using (SqlCommand cmd = new SqlCommand(sql, _connectionDB.con))
+                    {
+                        cmd.Parameters.AddWithValue("@versionNo", versionNo);
+                        cmd.Parameters.AddWithValue("@propertyName", CvVersion);
+                        cmd.ExecuteNonQuery();
+                    }
+                    _connectionDB.con.Close();
+
+                    string sql2 = "UPDATE [dbo].[SystemGlobalProperties] SET PropertyValue = @datetime WHERE PropertyName = @propertyName";
+                    _connectionDB.con.Open();
+                    using (SqlCommand cmd = new SqlCommand(sql2, _connectionDB.con))
+                    {
+                        cmd.Parameters.AddWithValue("@datetime", DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+                        cmd.Parameters.AddWithValue("@propertyName", CvVersionTime);
+                        cmd.ExecuteNonQuery();
+                    }
+                    _connectionDB.con.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                using (EventLog eventLog = new EventLog("Application"))
+                {
+                    eventLog.Source = "Application";
+                    eventLog.WriteEntry("Harvest Service Error Messege: " + ex.Message, EventLogEntryType.Error, 999, 1);
+                }
+                _logger.Log("GetFileLocation Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+
+                throw ex;
             }
             finally
             {

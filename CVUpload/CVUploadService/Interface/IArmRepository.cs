@@ -21,5 +21,7 @@ namespace CVUploadService
         string GetDestinationTableName(string sourceTableName);
         int TruncateTable(string TableName);
         int AddBulkDataForLargeFile(string path, string v);
+        void InsertVersionNoIfNotFound(string versionNo);
+
     }
 }
