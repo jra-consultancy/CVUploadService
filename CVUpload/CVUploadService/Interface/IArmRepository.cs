@@ -22,6 +22,9 @@ namespace CVUploadService
         int TruncateTable(string TableName);
         int AddBulkDataForLargeFile(string path, string v);
         void InsertVersionNoIfNotFound(string versionNo);
+        List<(int,string)> GetHeaderInformation();
+        string UpdateOdataJson(string jsonData,int id);
+        void ExecuteSql(string sql);
 
     }
 }

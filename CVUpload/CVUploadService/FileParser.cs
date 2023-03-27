@@ -4,18 +4,16 @@ using CsvHelper;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Security.AccessControl;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Reflection;
+using ExcelDataReader;
+using Newtonsoft.Json;
 
 namespace CVUploadService
 {
@@ -293,6 +291,9 @@ namespace CVUploadService
                 if (!Directory.Exists(RejectedFile))
                     Directory.CreateDirectory(RejectedFile);
 
+
+                CheckHeaderAndUpdate();
+
                 var stringData = FileRead();
 
                 foreach (var file in stringData)
@@ -459,6 +460,114 @@ namespace CVUploadService
             }
 
 
+        }
+
+        private void CheckHeaderAndUpdate()
+        {
+            List<(int, string)> columnHeaders = _iArmRepo.GetHeaderInformation();
+
+            // Compare column headers for each file
+            foreach (string filePath in Directory.GetFiles(UploadQueue))
+            {
+                // Set up file stream
+                FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
+
+                // Read column headers from file
+                string[] fileHeaders;
+                DataTable dataTable = new DataTable();
+                if (Path.GetExtension(filePath).Equals(".xls") || Path.GetExtension(filePath).Equals(".xlsx"))
+                {
+                    // Read Excel file
+                    using (var reader = ExcelReaderFactory.CreateReader(stream))
+                    {
+                        var dataSet = reader.AsDataSet();
+                        dataTable = dataSet.Tables[0];
+                        fileHeaders = dataTable.Columns.Cast<System.Data.DataColumn>()
+                            .Select(column => column.ColumnName)
+                            .ToArray();
+                    }
+                }
+                else if (Path.GetExtension(filePath).Equals(".csv") || Path.GetExtension(filePath).Equals(".txt"))
+                {
+                    // Read CSV or TXT file
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var headerLine = reader.ReadLine();
+                        fileHeaders = headerLine.Split(',');
+                        foreach (var header in fileHeaders)
+                        {
+                            dataTable.Columns.Add(header);
+                        }
+
+                        // Read data and add rows to DataTable
+                        while (!reader.EndOfStream)
+                        {
+                            var dataLine = reader.ReadLine();
+                            var dataValues = dataLine.Split(',');
+                            var dataRow = dataTable.NewRow();
+
+                            for (int i = 0; i < dataValues.Length; i++)
+                            {
+                                dataRow[i] = dataValues[i];
+                            }
+
+                            dataTable.Rows.Add(dataRow);
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.Log("CheckHeaderAndUpdate : Invalid File ", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                    continue;
+                }
+
+                foreach (var columnHeader in columnHeaders)
+                {
+                    if (columnHeader.Item2 == string.Join(",", fileHeaders))
+                    {
+                        string jsonData = JsonConvert.SerializeObject(dataTable);
+                        string executeSql = _iArmRepo.UpdateOdataJson(jsonData, columnHeader.Item1);
+                        if (!string.IsNullOrEmpty(executeSql))
+                        {
+                            _iArmRepo.ExecuteSql(executeSql);
+                        }
+                        RemoveMatchingFileFromFolder(stream,filePath);
+                        DeleteMatchingFileFromFolder(filePath);
+                        break;
+                    }
+                }
+
+            }
+
+        }
+
+        private void DeleteMatchingFileFromFolder(string filePath)
+        {
+            try
+            {
+                File.Delete(UploadQueue + filePath);
+            }
+            catch (IOException e)
+            {
+                _logger.Log("DeleteMatchingFileFromFolder :Delete failed ", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+            }
+        }
+
+        private void RemoveMatchingFileFromFolder(FileStream stream, string filePath)
+        {
+            try
+            {
+                stream.Close();
+                string fileToMove = UploadQueue + Path.GetFileName(filePath);
+                string moveTo = UploadCompletePath + Path.GetFileNameWithoutExtension(filePath) + DateTime.Now.ToString("ddMMyy") + Path.GetExtension(filePath);
+
+                //moving file
+                File.Copy(fileToMove, moveTo, true);
+            }
+            catch (Exception e)
+            {
+                _logger.Log("RemoveMatchingFileFromFolder :Matching File Remove failed " + e.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+            }
         }
 
         private DataTable GetDataTableWithHeader(string path)

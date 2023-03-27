@@ -29,6 +29,7 @@ namespace CVUploadService
         private string defaultSchema = "dbo.";
         private string CvVersion = "CvUploader_version";
         private string CvVersionTime = "CvUploader_InstalledDate";
+        private string headerType = "Import";
         public ArmRepository()
         {
             _logger = Logger.GetInstance;
@@ -577,6 +578,104 @@ namespace CVUploadService
                 }
                 _logger.Log("GetFileLocation Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
 
+                throw ex;
+            }
+            finally
+            {
+                if (_connectionDB.con.State == System.Data.ConnectionState.Open)
+                {
+                    _connectionDB.con.Close();
+                }
+            }
+        }
+
+        public List<(int,string)> GetHeaderInformation()
+        {
+            List<(int id, string header)> columnHeaders = new List<(int, string)>();
+
+            try
+            {
+                string sql = "SELECT Id,Param1 FROM A_Connector WHERE type = @type";
+
+
+                using (SqlCommand cmd = new SqlCommand(sql, _connectionDB.con))
+                {
+                    _connectionDB.con.Open();
+                    cmd.Parameters.AddWithValue("@type", headerType);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        columnHeaders.Add(((int)reader["ConnectorID"], (string)reader["Param1"]));
+                    }
+                    reader.Close();
+
+                    _connectionDB.con.Close();
+                }
+                return columnHeaders;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.Log("GetHeaderInformation Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                throw ex;
+                
+            }
+            finally
+            {
+                if (_connectionDB.con.State == System.Data.ConnectionState.Open)
+                {
+                    _connectionDB.con.Close();
+                }
+            }
+        }
+
+        public string UpdateOdataJson(string jsonData,int id)
+        {
+            string sql = "UPDATE [dbo].[Odata_json] SET jsonValue = @json WHERE connectorID = @id; SELECT dataUpdateSql FROM [dbo].[Odata_json] WHERE connectorID = @id;";
+            string dataUpdateSql = "";
+            try
+            {
+                using (SqlCommand cmd = new SqlCommand(sql, _connectionDB.con))
+                {
+
+                    _connectionDB.con.Open();
+                    cmd.Parameters.AddWithValue("@json", jsonData);
+                    cmd.Parameters.AddWithValue("@id", id);
+                    dataUpdateSql = (string)cmd.ExecuteScalar();
+                    _connectionDB.con.Close();
+                }
+                return dataUpdateSql;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.Log("UpdateOdataJson Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                throw ex;
+                
+            }
+            finally
+            {
+                if (_connectionDB.con.State == System.Data.ConnectionState.Open)
+                {
+                    _connectionDB.con.Close();
+                }
+            }
+        }
+
+        public void ExecuteSql(string sql)
+        {
+            try
+            {
+                using (SqlCommand cmd = new SqlCommand(sql, _connectionDB.con))
+                {
+                    _connectionDB.con.Open();
+                    cmd.ExecuteNonQuery();
+                    _connectionDB.con.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log("ExecuteSql Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
                 throw ex;
             }
             finally
