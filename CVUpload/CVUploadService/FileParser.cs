@@ -15,6 +15,7 @@ using System.Reflection;
 using ExcelDataReader;
 using Newtonsoft.Json;
 
+
 namespace CVUploadService
 {
     public class FileParser
@@ -89,6 +90,8 @@ namespace CVUploadService
                 }
                 if (!Directory.Exists(RejectedFile))
                     Directory.CreateDirectory(RejectedFile);
+
+                CheckHeaderAndUpdate();
 
                 var stringData = FileRead();
 
@@ -480,7 +483,14 @@ namespace CVUploadService
                     // Read Excel file
                     using (var reader = ExcelReaderFactory.CreateReader(stream))
                     {
-                        var dataSet = reader.AsDataSet();
+                        // Set the FirstRowAsHeader option to true to use the first row as headers
+                        var dataSet = reader.AsDataSet(new ExcelDataSetConfiguration
+                        {
+                            ConfigureDataTable = _ => new ExcelDataTableConfiguration
+                            {
+                                UseHeaderRow = true
+                            }
+                        });
                         dataTable = dataSet.Tables[0];
                         fileHeaders = dataTable.Columns.Cast<System.Data.DataColumn>()
                             .Select(column => column.ColumnName)
@@ -494,24 +504,21 @@ namespace CVUploadService
                     {
                         var headerLine = reader.ReadLine();
                         fileHeaders = headerLine.Split(',');
-                        foreach (var header in fileHeaders)
+
+                        //string[] headers = reader.ReadLine().Split(',');
+                        foreach (string header in fileHeaders)
                         {
                             dataTable.Columns.Add(header);
                         }
-
-                        // Read data and add rows to DataTable
                         while (!reader.EndOfStream)
                         {
-                            var dataLine = reader.ReadLine();
-                            var dataValues = dataLine.Split(',');
-                            var dataRow = dataTable.NewRow();
-
-                            for (int i = 0; i < dataValues.Length; i++)
+                            string[] rows = reader.ReadLine().Split(',');
+                            DataRow dr = dataTable.NewRow();
+                            for (int i = 0; i < fileHeaders.Length; i++)
                             {
-                                dataRow[i] = dataValues[i];
+                                dr[i] = rows[i];
                             }
-
-                            dataTable.Rows.Add(dataRow);
+                            dataTable.Rows.Add(dr);
                         }
                     }
                 }
@@ -545,11 +552,11 @@ namespace CVUploadService
         {
             try
             {
-                File.Delete(UploadQueue + filePath);
+                File.Delete(filePath);
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                _logger.Log("DeleteMatchingFileFromFolder :Delete failed ", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                _logger.Log("DeleteMatchingFileFromFolder :Delete failed " + e.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
             }
         }
 

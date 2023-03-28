@@ -595,7 +595,7 @@ namespace CVUploadService
 
             try
             {
-                string sql = "SELECT Id,Param1 FROM A_Connector WHERE type = @type";
+                string sql = "SELECT ConnectorID,Param1 FROM A_Connector WHERE type = @type";
 
 
                 using (SqlCommand cmd = new SqlCommand(sql, _connectionDB.con))
@@ -641,7 +641,11 @@ namespace CVUploadService
                     _connectionDB.con.Open();
                     cmd.Parameters.AddWithValue("@json", jsonData);
                     cmd.Parameters.AddWithValue("@id", id);
-                    dataUpdateSql = (string)cmd.ExecuteScalar();
+                    object result = cmd.ExecuteScalar();
+                    if (result != DBNull.Value)
+                    {
+                        dataUpdateSql = (string)result;
+                    }
                     _connectionDB.con.Close();
                 }
                 return dataUpdateSql;
