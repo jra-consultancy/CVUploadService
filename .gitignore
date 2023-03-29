@@ -72,3 +72,8 @@ ARMMordanizerService/ARMMordanizerService/bin/Release/ARMMordanizerService.exe
 ARMMordanizerService/ARMMordanizerService/bin/Debug/ARMMordanizerService.pdb
 ARMMordanizerService/ARMMordanizerService/bin/Debug/ARMMordanizerService.exe
 ARMMordanizerService/ARMMordanizerService/App.config
+CVUpload/CVUploadService/uninstall.bat
+CVUpload/.vs/CVUploadService/v17/.suo
+CVUpload/CVUploadService/obj/Debug/CVUploadService.csprojAssemblyReference.cache
+CVUpload/CVUploadService/obj/Debug/CVUploadService.csproj.CoreCompileInputs.cache
+CVUpload/CVUploadService/uninstall.bat

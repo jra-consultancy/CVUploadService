@@ -605,7 +605,22 @@ namespace CVUploadService
                     SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
-                        columnHeaders.Add(((int)reader["ConnectorID"], (string)reader["Param1"]));
+                        // columnHeaders.Add(((int)reader["ConnectorID"], (string)reader["Param1"]));
+
+                        int connectorID = 0;
+                        string param1="";
+
+                        if (!DBNull.Value.Equals(reader["ConnectorID"]))
+                        {
+                            connectorID = (int)reader["ConnectorID"];
+                        }
+
+                        if (!DBNull.Value.Equals(reader["Param1"]))
+                        {
+                            param1 = (string)reader["Param1"];
+                        }
+
+                        columnHeaders.Add((connectorID, param1));
                     }
                     reader.Close();
 
