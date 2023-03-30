@@ -532,7 +532,35 @@ namespace CVUploadService
                 {
                     if (columnHeader.Item2 == string.Join(",", fileHeaders))
                     {
-                        string jsonData = JsonConvert.SerializeObject(dataTable);
+                        var jsonSettings = new JsonSerializerSettings
+                        {
+                            StringEscapeHandling = StringEscapeHandling.EscapeHtml
+                        };
+                        for (int i = 0; i < dataTable.Columns.Count; i++)
+                        {
+                            var columnName = dataTable.Columns[i].ColumnName;
+                            if (dataTable.Columns[i].DataType == typeof(string))
+                            {
+                                var jsonColumnData = dataTable.AsEnumerable()
+                                    .Select(row => row.Field<string>(columnName))
+                                    .Where(value => !string.IsNullOrEmpty(value) && value.StartsWith("{") && value.EndsWith("}"))
+                                    .ToList();
+                                if (jsonColumnData.Count > 0)
+                                {
+                                    foreach (var row in dataTable.AsEnumerable())
+                                    {
+                                        var jsonValue = row.Field<string>(columnName);
+                                        if (!string.IsNullOrEmpty(jsonValue) && jsonValue.StartsWith("{") && jsonValue.EndsWith("}"))
+                                        {
+                                            row[columnName] = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(jsonValue), jsonSettings);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        var jsonData = JsonConvert.SerializeObject(dataTable, Formatting.Indented);
+
+
                         string executeSql = _iArmRepo.UpdateOdataJson(jsonData, columnHeader.Item1);
                         if (!string.IsNullOrEmpty(executeSql))
                         {

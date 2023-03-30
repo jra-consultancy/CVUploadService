@@ -107,3 +107,4 @@ E:\work\Projects\CVUploadService\CVUpload\CVUploadService\bin\Debug\System.Threa
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.CopyComplete
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.exe
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.pdb
+E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csprojAssemblyReference.cache
