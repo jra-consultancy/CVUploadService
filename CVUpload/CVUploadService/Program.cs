@@ -24,6 +24,7 @@ namespace CVUploadService
             //    new CVUploadService()
             //};
             //ServiceBase.Run(ServicesToRun);
+
         }
     }
 }
