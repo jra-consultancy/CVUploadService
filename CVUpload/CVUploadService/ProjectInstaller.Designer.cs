@@ -39,6 +39,7 @@
             // 
             // CVUpload
             // 
+            this.CVUpload.DelayedAutoStart = true;
             this.CVUpload.ServiceName = "CV Upload Service";
             // 
             // ProjectInstaller

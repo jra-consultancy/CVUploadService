@@ -57,8 +57,6 @@ D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\bin\Debug\System.Memory.
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\bin\Debug\System.Numerics.Vectors.xml
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\bin\Debug\System.Threading.Tasks.Extensions.xml
-D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.AssemblyReference.cache
-D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.SuggestedBindingRedirects.cache
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.CVUploadService.resources
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.ProjectInstaller.resources
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.GenerateResource.cache
@@ -108,3 +106,9 @@ E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadServ
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.exe
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.pdb
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csprojAssemblyReference.cache
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\ExcelDataReader.DataSet.dll
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\ExcelDataReader.dll
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\Newtonsoft.Json.dll
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\ExcelDataReader.xml
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\ExcelDataReader.DataSet.xml
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\Newtonsoft.Json.xml

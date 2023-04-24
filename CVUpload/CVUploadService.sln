@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1231
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33027.164
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CVUploadService", "CVUploadService\CVUploadService.csproj", "{48573166-0012-4F27-8401-43E2607F00E6}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "CVUploadServiceSetup", "CVUploadServiceSetup\CVUploadServiceSetup.vdproj", "{7F6250D6-29C4-4FA3-8533-FD808CD7E58B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,8 @@ Global
 		{48573166-0012-4F27-8401-43E2607F00E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48573166-0012-4F27-8401-43E2607F00E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48573166-0012-4F27-8401-43E2607F00E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F6250D6-29C4-4FA3-8533-FD808CD7E58B}.Debug|Any CPU.ActiveCfg = Debug
+		{7F6250D6-29C4-4FA3-8533-FD808CD7E58B}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
