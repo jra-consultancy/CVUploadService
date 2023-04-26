@@ -112,3 +112,6 @@ D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\Newtonsoft.Jso
 D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\ExcelDataReader.xml
 D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\ExcelDataReader.DataSet.xml
 D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\Newtonsoft.Json.xml
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\log4net.dll
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\log4net.xml
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.AssemblyReference.cache

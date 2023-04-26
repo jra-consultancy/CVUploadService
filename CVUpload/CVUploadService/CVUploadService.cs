@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CVUploadService.Service;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
@@ -17,23 +18,24 @@ namespace CVUploadService
 {
     public partial class CVUploadService : ServiceBase
     {
-        private readonly ILogger _logger;
+        //private readonly ILogger _logger;
 
         readonly System.Timers.Timer _timer = new System.Timers.Timer();
-        private string UploadLogFile = "";
+        //private string UploadLogFile = "";
         private System.Timers.Timer timer;
+        Logger4net log;
 
 
         ArmRepository _iArmRepo = new ArmRepository();
         public CVUploadService()
         {
 
-            UploadLogFile = _iArmRepo.GetFileLocation(3);
-            _logger = Logger.GetInstance;
-            CreateLogDirectory(UploadLogFile);
-
+            //UploadLogFile = _iArmRepo.GetFileLocation(3);
+            //_logger = Logger.GetInstance;
+            //CreateLogDirectory(UploadLogFile);
             //InitializeComponents();
 
+            log = new Logger4net();
 
         }
 
@@ -47,7 +49,7 @@ namespace CVUploadService
             }
             if (!Directory.Exists(uploadLogFile))
                 Directory.CreateDirectory(uploadLogFile);
-            _logger.Log("Creating Log Directory", @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+           // _logger.Log("Creating Log Directory", @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
 
         }
 
@@ -55,13 +57,14 @@ namespace CVUploadService
         {
             try
             {
-                _logger.Log("Service started", @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-
+                //_logger.Log("Service started", @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("Service started", "Service started");
                 InitializeComponents();
             }
             catch (Exception ex)
             {
-                _logger.Log("Service Exception Occured in OnStart" + ex.Message, @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("Service Exception Occured in OnStart" + ex.Message, @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("Service Exception Occured in OnStart" + ex.Message + ex.InnerException, "OnStart");
 
             }
         }
@@ -80,7 +83,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("Service Exception Occured in InitializeComponents" + ex.Message, @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("Service Exception Occured in InitializeComponents" + ex.Message, @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("Service Exception Occured in InitializeComponents" + ex.Message + ex.InnerException, "InitializeComponents");
 
             }
         }
@@ -92,11 +96,15 @@ namespace CVUploadService
             {
                 _timer.Enabled = false;
                 _timer.Stop();
-                _logger.Log("Service stopped", @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+
+               // _logger.Log("Service stopped", @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("Service stopped", "Service stopped");
+
             }
             catch (Exception ex)
             {
-                _logger.Log("Service Exception Occured in OnStop" + ex.Message, @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("Service Exception Occured in OnStop" + ex.Message, @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("Service Exception Occured in OnStop" + ex.Message + ex.InnerException, "OnStop");
 
             }
 

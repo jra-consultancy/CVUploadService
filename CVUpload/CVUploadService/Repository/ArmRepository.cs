@@ -1,4 +1,5 @@
 ﻿using CVUploadService.Model;
+using CVUploadService.Service;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -18,24 +19,28 @@ namespace CVUploadService
     public class ArmRepository : IArmRepository
     {
         private ConnectionDb _connectionDB;
-        private readonly ILogger _logger;
+        Logger4net log;
+
+        //private readonly ILogger _logger;
         private string temTableNamePrefix1 = "TMP_RAW_";
         private string temTableNamePrefix2 = "TMP_";
         private string schemaName = "dbo.";
         private string UploadTimeInterval = "";
         private string UploadQueue = "";
         private string UploadCompletePath = "";
-        private string UploadLogFile = "";
+       // private string UploadLogFile = "";
         private string defaultSchema = "dbo.";
         private string CvVersion = "CvUploader_version";
         private string CvVersionTime = "CvUploader_InstalledDate";
         private string headerType = "Import";
+       
         public ArmRepository()
         {
-            _logger = Logger.GetInstance;
+            //_logger = Logger.GetInstance;
 
             _connectionDB = new ConnectionDb();
-            UploadLogFile = GetFileLocation(3);
+            log = new Logger4net();
+            //UploadLogFile = GetFileLocation(3);
         }
 
         public int AddBulkData(DataTable dt, string tableName)
@@ -92,7 +97,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("AddBulkData Exception: " + ex.Message + " Table Name/FileName " + tableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("AddBulkData Exception: " + ex.Message + " Table Name/FileName " + tableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("AddBulkData Exception: : Table Name/FileName " + tableName + ex.Message + ex.InnerException, "AddBulkData");
                 //throw ex;
                 return -1;
             }
@@ -174,7 +180,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("AddBulkData Exception: " + ex.Message + " Table Name/FileName " + tableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("AddBulkData Exception: " + ex.Message + " Table Name/FileName " + tableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("AddBulkDataForLargeFile Exception: Table Name/FileName " + tableName + ex.Message + ex.InnerException, "AddBulkDataForLargeFile");
                 //throw ex;
                 return -1;
             }
@@ -208,7 +215,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("CheckTableExists Exception: " + ex.Message + " Table Name/FileName: " + Tablename, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("CheckTableExists Exception: " + ex.Message + " Table Name/FileName: " + Tablename, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("CheckTableExists Exception: :  Table Name/FileName: " + Tablename + ex.Message + ex.InnerException, "CheckTableExists");
                 //throw ex;
                 return -1;
             }
@@ -246,7 +254,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("SaveFile Exception: " + ex.Message + " Table Name/FileName: " + file.FileName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("SaveFile Exception: " + ex.Message + " Table Name/FileName: " + file.FileName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("SaveFile Exception: : Table Name / FileName: " + file.FileName + ex.Message + ex.InnerException, "SaveFile");
                 //throw ex;
                 return -1;
             }
@@ -274,7 +283,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("SchemeCreate Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("SchemeCreate Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("SchemeCreate Exception: :" + ex.Message + ex.InnerException, "SchemeCreate");
                 //_connectionDB.con.Close();
                 //throw ex;
                 return -1;
@@ -307,7 +317,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("TruncateTable Exception: " + ex.Message + " Table Name/FileName: " + tableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("TruncateTable Exception: " + ex.Message + " Table Name/FileName: " + tableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("TruncateTable Exception: : Table Name / FileName: " + tableName + ex.Message + ex.InnerException, "TruncateTable");
                 //throw ex;
                 return -1;
             }
@@ -380,7 +391,8 @@ namespace CVUploadService
                     eventLog.Source = "Application";
                     eventLog.WriteEntry("CV Upload Service Error Messege: " + ex.Message, EventLogEntryType.Error, 999, 1);
                 }
-                _logger.Log("GetFileLocation Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("GetFileLocation Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("GetFileLocation Exception: :" + ex.Message + ex.InnerException, "GetFileLocation");
 
                 throw ex;
             }
@@ -418,7 +430,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("GetSqlFromMappingConfig Exception: " + ex.Message + " Table Name/FileName: " + temTableNamePrefix1 + key, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("GetSqlFromMappingConfig Exception: " + ex.Message + " Table Name/FileName: " + temTableNamePrefix1 + key, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("GetSqlFromMappingConfig Exception: Table Name/FileName: " + temTableNamePrefix1 + key + ex.Message + ex.InnerException, "GetSqlFromMappingConfig");
 
                 return "";
             }
@@ -447,7 +460,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("InsertDestinationTable Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("InsertDestinationTable Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("InsertDestinationTable Exception: :" + ex.Message + ex.InnerException, "InsertDestinationTable");
                 //throw ex;
                 return -1;
             }
@@ -482,7 +496,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("GetDestinationTableName Exception: " + ex.Message + " Table Name/FileName: " + defaultSchema + sourceTableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("GetDestinationTableName Exception: " + ex.Message + " Table Name/FileName: " + defaultSchema + sourceTableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("GetDestinationTableName Exception: : Table Name/FileName: " + defaultSchema + sourceTableName + ex.Message + ex.InnerException, "GetDestinationTableName");
                 //throw ex;
                 return "";
             }
@@ -512,7 +527,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("TruncateTable Exception: " + ex.Message + " Table Name/FileName: " + TableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("TruncateTable Exception: " + ex.Message + " Table Name/FileName: " + TableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("TruncateTable2 Exception: Table Name/FileName: " + TableName + ex.Message + ex.InnerException, "TruncateTable2");
                 //throw ex;
                 return -1;
             }
@@ -576,7 +592,8 @@ namespace CVUploadService
                     eventLog.Source = "Application";
                     eventLog.WriteEntry("Harvest Service Error Messege: " + ex.Message, EventLogEntryType.Error, 999, 1);
                 }
-                _logger.Log("GetFileLocation Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("GetFileLocation Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("GetFileLocation Exception: :" + ex.Message + ex.InnerException, "GetFileLocation");
 
                 throw ex;
             }
@@ -631,7 +648,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("GetHeaderInformation Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("GetHeaderInformation Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("GetHeaderInformation Exception: :" + ex.Message + ex.InnerException, "GetHeaderInformation");
                 throw ex;
                 
             }
@@ -668,7 +686,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("UpdateOdataJson Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("UpdateOdataJson Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("UpdateOdataJson Exception: :" + ex.Message + ex.InnerException, "UpdateOdataJson");
                 throw ex;
                 
             }
@@ -694,7 +713,8 @@ namespace CVUploadService
             }
             catch (Exception ex)
             {
-                _logger.Log("ExecuteSql Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                //_logger.Log("ExecuteSql Exception: " + ex.Message, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("ExecuteSql Exception: :" + ex.Message + ex.InnerException, "ExecuteSql");
                 throw ex;
             }
             finally

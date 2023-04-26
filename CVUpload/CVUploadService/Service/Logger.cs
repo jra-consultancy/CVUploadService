@@ -19,7 +19,7 @@ namespace CVUploadService
 
 
 
-        public void Log(string message,string filePath="")
+        public void LogX(string message,string filePath="")
         {
             lock (MyLock)
             {

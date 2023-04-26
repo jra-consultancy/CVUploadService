@@ -2,6 +2,6 @@
 {
     public interface ILogger
     {
-        void Log(string message,string filePath);
+        void LogX(string message,string filePath);
     }
 }
