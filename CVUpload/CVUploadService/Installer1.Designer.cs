@@ -29,7 +29,11 @@ namespace CVUploadService
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
+            // 
+            // Installer1
+            // 
+            this.AfterInstall += new System.Configuration.Install.InstallEventHandler(this.Installer1_AfterInstall);
+
         }
 
         #endregion

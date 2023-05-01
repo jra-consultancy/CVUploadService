@@ -114,4 +114,4 @@ D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\ExcelDataReade
 D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\Newtonsoft.Json.xml
 D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\log4net.dll
 D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\log4net.xml
-D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.AssemblyReference.cache
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.Installer1.resources

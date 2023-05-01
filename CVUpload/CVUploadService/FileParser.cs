@@ -29,8 +29,8 @@ namespace CVUploadService
         //private readonly ILogger _logger;
         private string UploadQueue = "";
         private string UploadCompletePath = "";
-        private string temTableNamePrefix1 = "TMP_RAW_";
-        private string temTableNamePrefix2 = "TMP_";
+        private string temTableNamePrefix1 = "TMP_"; ///"TMP_RAW_";
+       // private string temTableNamePrefix2 = "TMP_";
         //private string UploadLogFile = "";
         private string RejectedFile = "";
         private string serviceName = "CV Upload Service";
@@ -62,188 +62,16 @@ namespace CVUploadService
             }
         }
         private static readonly object Mylock = new object();
+
+        public bool IsRunning = false;
+
         public void FileParse(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (!Monitor.TryEnter(Mylock, 0)) return;
+            if (IsRunning) {return; }
             try
             {
-                string version = GetServiceVersion(serviceName);
-                _iArmRepo.InsertVersionNoIfNotFound(version);
-                string isValid = "";
-                UploadQueue = _iArmRepo.GetFileLocation(1);
-                if (!UploadQueue.EndsWith("\\"))
-                {
-                    UploadQueue = UploadQueue + "\\";
-                }
-                if (!Directory.Exists(UploadQueue))
-                    Directory.CreateDirectory(UploadQueue);
-
-                UploadCompletePath = _iArmRepo.GetFileLocation(2);
-                if (!UploadCompletePath.EndsWith("\\"))
-                {
-                    UploadCompletePath = UploadCompletePath + "\\";
-                }
-                if (!Directory.Exists(UploadCompletePath))
-                    Directory.CreateDirectory(UploadCompletePath);
-
-                RejectedFile = _iArmRepo.GetFileLocation(4);
-                if (!RejectedFile.EndsWith("\\"))
-                {
-                    RejectedFile = RejectedFile + "\\";
-                }
-                if (!Directory.Exists(RejectedFile))
-                    Directory.CreateDirectory(RejectedFile);
-
-                CheckHeaderAndUpdate();
-
-                var stringData = FileRead();
-
-                foreach (var file in stringData)
-                {
-                    string path = UploadQueue + file.Key;
-                    isValid = _iArmService.IsValidFile(path);
-                    if (isValid == "" || isValid == string.Empty)
-                    {
-                        DataTable dt = GetFileData(file.Key, file.Value);
-                        //_logger.Log("File converted to Datatable Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                        log.PushLog("File converted to Datatable Successful!", "");
-                        if (dt != null)
-                        {
-
-                            int isExists = _iArmRepo.CheckTableExists(Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
-                            
-                            //_logger.Log("Check Table Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                            log.PushLog("Check Table Successful!", "");
-
-                            if (isExists > 0)
-                            {
-                                //_logger.Log("Table Already Exsist. Insert In If Condition!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                log.PushLog("Table Already Exsist. Insert In If Condition!", "");
-
-                                var result = _iArmRepo.TruncateTable(Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")), temTableNamePrefix1);
-                                //_logger.Log("Truncate Table Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                log.PushLog("Truncate Table Successful!", "");
-
-                                if (result == 1)
-                                {
-                                    result = _iArmRepo.AddBulkData(dt, Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
-                                    //_logger.Log("Insert Bulk Data Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                    log.PushLog("Insert Bulk Data Successful!", "");
-
-                                    if (result == 1)
-                                    {
-                                        createFileStore(file);
-                                        //_logger.Log("Insert FileStore Data Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                        log.PushLog("Insert FileStore Data Successful!", "");
-
-                                        string insertSql = GetSQLFromMapping(Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
-                                        //_logger.Log("Get Sql Mapping Data Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                        log.PushLog("Get Sql Mapping Data Successful!", "");
-
-                                        if (insertSql != "")
-                                        {
-                                            string destinationTableName = _iArmRepo.GetDestinationTableName(temTableNamePrefix1 + Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
-                                            //_logger.Log("Get Destination Data Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                            log.PushLog("Get Destination Data Successful!", "");
-
-                                            if (destinationTableName != "")
-                                            {
-                                                result = _iArmRepo.TruncateTable(destinationTableName);
-                                                //_logger.Log("Destination Table Data Truncate Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                                log.PushLog("Destination Table Data Truncate Successful!", "");
-
-                                                if (result == 1)
-                                                {
-                                                    result = _iArmRepo.InsertDestinationTable(insertSql);
-                                                    //_logger.Log("Destination Table Data Insert Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                                    log.PushLog("Destination Table Data Insert Successful!", "");
-
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                }
-
-                            }
-                            else if (isExists == -1) break;
-                            else
-                            {
-                                //_logger.Log("Table not Exsist. Insert In else Condition!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                log.PushLog("Table not Exsist. Insert In else Condition!", "");
-
-                                string createTableSQL = BuildCreateTableScript(dt, Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")), temTableNamePrefix1);
-                                if (createTableSQL == null)
-                                    return;
-                                var result = _iArmRepo.SchemeCreate(createTableSQL);
-                                //_logger.Log("Schema Created Successfully!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                log.PushLog("Schema Created Successfully!", "");
-
-                                if (result == 1)
-                                {
-                                    _iArmRepo.AddBulkData(dt, Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
-                                    //_logger.Log("Bulk Data Insert Successfully!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                    log.PushLog("Bulk Data Insert Successfully!", "");
-
-                                    if (result == 1)
-                                    {
-                                        createFileStore(file);
-                                        //_logger.Log("Insert FileStore Data Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                        log.PushLog("Insert FileStore Data Successful!", "");
-
-                                        string insertSql = GetSQLFromMapping(file.Key.Replace(" ", "_"));
-                                        //_logger.Log("Get Sql Mapping Data Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                        log.PushLog("Get Sql Mapping Data Successful!", "");
-
-                                        if (insertSql != "")
-                                        {
-                                            string destinationTableName = _iArmRepo.GetDestinationTableName(temTableNamePrefix1 + Path.GetFileNameWithoutExtension(UploadQueue + file.Key.Replace(" ", "_")));
-                                            //_logger.Log("Get Destination Data Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                            log.PushLog("Get Destination Data Successful!", "");
-
-                                            if (destinationTableName != "")
-                                            {
-                                                result = _iArmRepo.TruncateTable(destinationTableName);
-                                                //_logger.Log("Destination Table Data Truncate Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                                log.PushLog("Destination Table Data Truncate Successful!", "");
-
-                                                if (result == 1)
-                                                {
-                                                    result = _iArmRepo.InsertDestinationTable(insertSql);
-                                                    //_logger.Log("Destination Table Data Insert Successful!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                                                    log.PushLog("Destination Table Data Insert Successful!" , "");
-
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                            }
-                            dt.Clear();
-                            dt.Dispose();
-                        }
-                        else
-                        {
-                            file.Value.Close();
-                            RemoveFilesFromFolder(file);
-                            DeleteFilesFromFolder(file);
-                        }
-                    }
-                    else
-                    {
-                        log.PushLog("File Type Invalid: " + file.Key , "Invalid File");
-                        
-                        file.Value.Close();
-                        //_logger.Log("File Type Exception :" + isValid, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                        
-                        RemoveFilesFromFolder(file);
-                        DeleteFilesFromFolder(file);
-                    }
-                }
-
-                RemoveFilesFromFolder(stringData);
-                DeleteFilesFromFolder(stringData);
+                IsRunning = true;
+                Uploader();
             }
             catch (Exception ex)
             {
@@ -253,10 +81,43 @@ namespace CVUploadService
             }
             finally
             {
-                Monitor.Exit(Mylock);
+                IsRunning = false;
             }
 
 
+        }
+
+
+
+        // Add komang
+        private void MoveToReject(string Fname) {
+            try
+            {
+                string from = UploadQueue + Fname;
+                string to = RejectedFile + Path.GetFileNameWithoutExtension(Fname) + DateTime.Now.ToString("yyyyMMddHHmmss") + Path.GetExtension(Fname); ;
+
+                File.Move(from, to); // Try to move
+            }
+            catch (IOException ex)
+            {
+                 log.PushLog("MoveToReject : " + UploadQueue + Fname + ex.Message + ex.InnerException, "MoveToReject");
+            }
+        }
+
+        private void MoveToUploaded(string Fname)
+        {
+            try
+            {
+                string from = UploadQueue + Fname;
+                string to = UploadCompletePath + Path.GetFileNameWithoutExtension(Fname) + DateTime.Now.ToString("yyyyMMddHHmmss") + Path.GetExtension(Fname);
+                
+
+                File.Move(from, to); // Try to move
+            }
+            catch (IOException ex)
+            {
+                log.PushLog("MoveToUploaded : " + UploadQueue + Fname + ex.Message + ex.InnerException, "MoveToUploaded");
+            }
         }
 
         private void DeleteFilesFromFolder(KeyValuePair<string, Stream> file)
@@ -305,6 +166,7 @@ namespace CVUploadService
             {
                 DataTable dt;
                 string isValid = "";
+
                 UploadQueue = _iArmRepo.GetFileLocation(1);
                 if (!UploadQueue.EndsWith("\\"))
                 {
@@ -525,6 +387,154 @@ namespace CVUploadService
 
         }
 
+
+        public void Uploader() {
+
+            #region CreateDir
+            UploadQueue = _iArmRepo.GetFileLocation(1);
+            if (!UploadQueue.EndsWith("\\"))
+            {
+                UploadQueue = UploadQueue + "\\";
+            }
+            if (!Directory.Exists(UploadQueue))
+                Directory.CreateDirectory(UploadQueue);
+
+            UploadCompletePath = _iArmRepo.GetFileLocation(2);
+            if (!UploadCompletePath.EndsWith("\\"))
+            {
+                UploadCompletePath = UploadCompletePath + "\\";
+            }
+            if (!Directory.Exists(UploadCompletePath))
+                Directory.CreateDirectory(UploadCompletePath);
+
+            RejectedFile = _iArmRepo.GetFileLocation(4);
+            if (!RejectedFile.EndsWith("\\"))
+            {
+                RejectedFile = RejectedFile + "\\";
+            }
+            if (!Directory.Exists(RejectedFile))
+                Directory.CreateDirectory(RejectedFile);
+            #endregion
+
+
+
+            foreach (string txtNameFull in Directory.GetFiles(UploadQueue))
+            {
+                Stream FileStream;
+                string isValid = "";
+
+                try
+                {
+                    string txtName = Path.GetFileName(txtNameFull);
+
+                    string path = UploadQueue + txtName;
+
+                    isValid = _iArmService.IsValidFile(path);
+                    if (isValid == "" || isValid == string.Empty)
+                    {
+                        DataTable dt;
+                        FileStream = new StreamReader(path).BaseStream;
+
+                        dt = GetFileData(txtName, FileStream);
+
+                        if (dt != null)
+                        {
+                            // do insert data here
+                            int isExists = _iArmRepo.CheckTableExists(Path.GetFileNameWithoutExtension(UploadQueue + txtName.Replace(" ", "_")));
+
+                            if (isExists == -1) {
+                                FileStream.Close();
+                                MoveToReject(txtName);
+                                continue;
+                            }
+
+                            int DelIfExs = _iArmRepo.DeleteTableIfExists(Path.GetFileNameWithoutExtension(UploadQueue + txtName.Replace(" ", "_")));
+
+                            if (DelIfExs == 1)
+                            {
+                                //_logger.Log("Table not Exsist. Insert In else Condition!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                                log.PushLog("Table not Exsist. Insert In else Condition!", "");
+
+                                string createTableSQL = BuildCreateTableScript(dt, Path.GetFileNameWithoutExtension(UploadQueue + txtName.Replace(" ", "_")), temTableNamePrefix1);
+                                
+                                if (createTableSQL == null) {
+                                    FileStream.Close();
+                                    log.PushLog("Schema Created Failed!", "Schema Created Failed");
+                                    MoveToReject(txtName);
+                                    continue;
+                                }
+                                    
+
+                                var result = _iArmRepo.SchemeCreate(createTableSQL);
+                                //_logger.Log("Schema Created Successfully!", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+
+
+                                if (result == 1)
+                                {
+                                    log.PushLog("Schema Created Successfully!", "");
+                                    result = _iArmRepo.BulkInserData(dt, Path.GetFileNameWithoutExtension(UploadQueue + txtName.Replace(" ", "_")));
+                                    
+                                    if (result == 1)
+                                    {
+                                        log.PushLog("Bulk Data Insert Successfully!", "");
+                                        InsertFileStore(txtName);
+                                    }
+                                    else {
+                                        FileStream.Close();
+                                        log.PushLog("Bulk insert to database failed", "Bulk insert failed");
+                                        MoveToReject(txtName);
+                                        continue;
+                                    }
+                                }
+                                else {
+                                    FileStream.Close();
+                                    log.PushLog("Schema Failed to execute!", "Schema Created Failed");
+                                    MoveToReject(txtName);
+                                    continue;
+
+                                }
+                            }
+                            else {
+
+                                /// Fail to delete while convert to data tabel 
+                                FileStream.Close();
+                                MoveToReject(txtName);
+                                continue;
+                            }
+
+
+                        }
+                        else {
+                            /// if no data or error while convert to data tabel 
+                            FileStream.Close();
+                            MoveToReject(txtName);
+                            continue;
+                        }
+
+
+                        /// if Succes
+                        FileStream.Close();
+                        MoveToUploaded(txtName);
+                        continue;
+                    }
+                    else {
+                        /// if invalid format
+                        
+                        log.PushLog("Upload File : " + txtName + " Wrong Format File" , "Upload File");
+                        MoveToReject(txtName);
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    log.PushLog("Upload File : " + Path.GetFileName(txtNameFull) + " Error " + e.Message + e.InnerException, "Upload File");
+
+                }
+            }
+
+
+        }
+
         private void CheckHeaderAndUpdate()
         {
             List<(int, string)> columnHeaders = _iArmRepo.GetHeaderInformation();
@@ -556,6 +566,8 @@ namespace CVUploadService
                             .Select(column => column.ColumnName)
                             .ToArray();
                     }
+
+
                 }
                 else if (Path.GetExtension(filePath).Equals(".csv") || Path.GetExtension(filePath).Equals(".txt"))
                 {
@@ -586,7 +598,7 @@ namespace CVUploadService
                 {
                     //_logger.Log("CheckHeaderAndUpdate : Invalid File ", UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
                     log.PushLog("CheckHeaderAndUpdate : Invalid File" + filePath, "");
-
+                    stream.Close();
                     continue;
                 }
 
@@ -721,6 +733,21 @@ namespace CVUploadService
             }
         }
 
+        // komang 
+
+        private void InsertFileStore(String fileName)
+        {
+            string tableName = temTableNamePrefix1 + Path.GetFileNameWithoutExtension(fileName).Replace(" ", "_");
+            FileStore xFile = new FileStore
+            {
+                FileName = Path.GetFileNameWithoutExtension(UploadQueue + fileName.Replace(" ", "_")),
+                ExecutionTime = DateTime.Now,
+                Status = true,
+                TableName = tableName
+            };
+            _iArmRepo.SaveFile(xFile);
+        }
+
         private void createFileStore(KeyValuePair<string, Stream> file)
         {
             string tableName = temTableNamePrefix1 + Path.GetFileNameWithoutExtension(file.Key).Replace(" ", "_");
@@ -852,7 +879,7 @@ namespace CVUploadService
                     value.Close();
                     return dt;
                 }
-                else if (Path.GetExtension(key) == ".xlsx")
+                else if (Path.GetExtension(key) == ".xlsx" || Path.GetExtension(key) == ".xls")
                 {
                     using (var package = new ExcelPackage(value))
                     {

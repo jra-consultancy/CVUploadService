@@ -26,5 +26,8 @@ namespace CVUploadService
         string UpdateOdataJson(string jsonData,int id);
         void ExecuteSql(string sql);
 
+        int DeleteTableIfExists(string Tablename);
+        int BulkInserData(DataTable Dt, string tableName);
+
     }
 }

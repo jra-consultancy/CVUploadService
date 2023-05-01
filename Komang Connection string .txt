@@ -1,0 +1,1 @@
+<!--<add name="ArmConnection" connectionString="Data Source=02-05-0352-0221\MSSQLSERVER01;Initial Catalog=ARM_CORE;User ID=sa;Password=Tantalum73;Pooling=True;Max Pool Size=500;MultipleActiveResultSets=True;Application Name=EntityFramework;Connection Timeout=1800 " providerName="System.Data.SqlClient" />-->

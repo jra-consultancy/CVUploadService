@@ -99,7 +99,7 @@ namespace CVUploadService.Service
 
         public void UpdateLogToDb(string ErrorMsg, string Even)
         {
-            string query = "EXEC dbo.SP_InsertADErrorLog @ErrorMsg,@Even";
+            string query = "EXEC dbo.SP_InsertUplErrorLog @ErrorMsg,@Even";
 
 
             try

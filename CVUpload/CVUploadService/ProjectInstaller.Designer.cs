@@ -47,6 +47,7 @@
             this.Installers.AddRange(new System.Configuration.Install.Installer[] {
             this.CVUploadProcess,
             this.CVUpload});
+            this.AfterInstall += new System.Configuration.Install.InstallEventHandler(this.ProjectInstaller_AfterInstall);
 
         }
 

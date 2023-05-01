@@ -22,14 +22,14 @@ namespace CVUploadService
         Logger4net log;
 
         //private readonly ILogger _logger;
-        private string temTableNamePrefix1 = "TMP_RAW_";
+        private string temTableNamePrefix1 = "TMP_";
         private string temTableNamePrefix2 = "TMP_";
         private string schemaName = "dbo.";
         private string UploadTimeInterval = "";
         private string UploadQueue = "";
         private string UploadCompletePath = "";
        // private string UploadLogFile = "";
-        private string defaultSchema = "dbo.";
+        private string defaultSchema = "dbo";
         private string CvVersion = "CvUploader_version";
         private string CvVersionTime = "CvUploader_InstalledDate";
         private string headerType = "Import";
@@ -126,6 +126,7 @@ namespace CVUploadService
                 //    }
                 //}
                 _connectionDB.con.Open();
+
                 using (SqlBulkCopy bulk = new SqlBulkCopy(_connectionDB.con) { DestinationTableName = "[" + temTableNamePrefix1 + tableName + "]", BatchSize = 500000000, BulkCopyTimeout = 0 })
                 {
                     bulk.DestinationTableName = "[" + temTableNamePrefix1 + tableName + "]";
@@ -183,6 +184,87 @@ namespace CVUploadService
                 //_logger.Log("AddBulkData Exception: " + ex.Message + " Table Name/FileName " + tableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
                 log.PushLog("AddBulkDataForLargeFile Exception: Table Name/FileName " + tableName + ex.Message + ex.InnerException, "AddBulkDataForLargeFile");
                 //throw ex;
+                return -1;
+            }
+            finally
+            {
+                if (_connectionDB.con.State == System.Data.ConnectionState.Open)
+                {
+                    _connectionDB.con.Close();
+                }
+            }
+
+
+        }
+
+
+        public int BulkInserData(DataTable Dt, string tableName)
+        {
+            try
+            {
+
+                DataTable dtSource = new DataTable();
+                string sourceTableQuery = "Select top 1 * from [" + temTableNamePrefix1 + tableName + "]";
+                using (SqlCommand cmd = new SqlCommand(sourceTableQuery, _connectionDB.con))
+                {
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dtSource);
+                    }
+                }
+
+                _connectionDB.con.Open();
+                using (SqlBulkCopy bulk = new SqlBulkCopy(_connectionDB.con) { DestinationTableName = "[" + temTableNamePrefix1 + tableName + "]", BatchSize = 500000000, BulkCopyTimeout = 0 })
+                {
+                    bulk.DestinationTableName = "[" + temTableNamePrefix1 + tableName + "]";
+
+                    for (int i = 0; i < Dt.Columns.Count; i++)
+                    {
+                        string destinationColumnName = Dt.Columns[i].ToString();
+  
+                        if (dtSource.Columns.Contains(destinationColumnName))
+                        {
+                            int sourceColumnIndex = dtSource.Columns.IndexOf(destinationColumnName);
+
+                            string sourceColumnName = dtSource.Columns[sourceColumnIndex].ToString();
+
+                            bulk.ColumnMappings.Add(sourceColumnName, sourceColumnName);
+                        }
+                    }
+
+
+                    DataTable newTable = Dt.Clone();
+
+                    int counter = 0;
+                    foreach (DataRow dr in Dt.Rows) {
+                        counter = counter + 1;
+
+                        //var desRow = Dt.NewRow();
+                        //desRow.ItemArray = dr.ItemArray.Clone() as object[];
+                        //newTable.Rows.Add(desRow);
+                        newTable.ImportRow(dr);
+
+                        if (counter == 1000) {
+                            bulk.WriteToServer(newTable);
+                            newTable.Clear();
+                            counter = 0;
+                        }
+
+                    }
+
+                    if (counter > 0 )
+                    {
+                        bulk.WriteToServer(newTable);
+                        newTable.Clear();
+                        counter = 0;
+                    }
+                }
+                _connectionDB.con.Close();
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                log.PushLog("AddBulkDataForLargeFile Exception: Table Name/FileName " + tableName + ex.Message + ex.InnerException, "AddBulkDataForLargeFile");
                 return -1;
             }
             finally
@@ -485,7 +567,7 @@ namespace CVUploadService
                 using (SqlCommand cmd = new SqlCommand(sql, _connectionDB.con))
                 {
                     _connectionDB.con.Open();
-                    cmd.Parameters.AddWithValue("@sourceTableName", defaultSchema + sourceTableName);
+                    cmd.Parameters.AddWithValue("@sourceTableName", defaultSchema +"." + sourceTableName);
 
                     destinationTableName = (string)cmd.ExecuteScalar();
 
@@ -497,7 +579,7 @@ namespace CVUploadService
             catch (Exception ex)
             {
                 //_logger.Log("GetDestinationTableName Exception: " + ex.Message + " Table Name/FileName: " + defaultSchema + sourceTableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
-                log.PushLog("GetDestinationTableName Exception: : Table Name/FileName: " + defaultSchema + sourceTableName + ex.Message + ex.InnerException, "GetDestinationTableName");
+                log.PushLog("GetDestinationTableName Exception: : Table Name/FileName: " + defaultSchema+"." + sourceTableName + ex.Message + ex.InnerException, "GetDestinationTableName");
                 //throw ex;
                 return "";
             }
@@ -509,6 +591,42 @@ namespace CVUploadService
                 }
             }
         }
+
+        public int DeleteTableIfExists(string TableName)
+        {
+
+            string strTruncateTable = @"IF EXISTS(SELECT * FROM sys.tables WHERE SCHEMA_NAME(schema_id) = @Schena AND name = @TableName) begin  
+                                        DROP TABLE ["+ defaultSchema + "].["+ temTableNamePrefix1 + TableName + "] end;";
+
+
+            try
+            {
+                using (SqlCommand cmd = new SqlCommand(strTruncateTable, _connectionDB.con))
+                {
+                    _connectionDB.con.Open();
+                    cmd.Parameters.AddWithValue("@TableName", temTableNamePrefix1 + TableName);
+                    cmd.Parameters.AddWithValue("@Schena", defaultSchema);
+                    cmd.ExecuteNonQuery();
+                    _connectionDB.con.Close();
+                }
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                //_logger.Log("TruncateTable Exception: " + ex.Message + " Table Name/FileName: " + TableName, UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
+                log.PushLog("DeleteTableIfExists Exception: Table Name/FileName: " + TableName + ex.Message + ex.InnerException, "DeleteTableIfExists");
+                //throw ex;
+                return -1;
+            }
+            finally
+            {
+                if (_connectionDB.con.State == System.Data.ConnectionState.Open)
+                {
+                    _connectionDB.con.Close();
+                }
+            }
+        }
+
 
         public int TruncateTable(string TableName)
         {

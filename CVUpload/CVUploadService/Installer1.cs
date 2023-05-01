@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Configuration.Install;
 using System.IO;
 using System.Linq;
+using System.ServiceProcess;
 using System.Threading.Tasks;
 
 namespace CVUploadService
@@ -57,6 +58,11 @@ namespace CVUploadService
                 writer.Close();
             }
 
+        }
+
+        private void Installer1_AfterInstall(object sender, InstallEventArgs e)
+        {
+            
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration.Install;
 using System.Linq;
+using System.ServiceProcess;
 using System.Threading.Tasks;
 
 namespace CVUploadService
@@ -14,6 +15,11 @@ namespace CVUploadService
         public ProjectInstaller()
         {
             InitializeComponent();
+        }
+
+        private void ProjectInstaller_AfterInstall(object sender, InstallEventArgs e)
+        {
+            new ServiceController(CVUpload.ServiceName).Start();
         }
     }
 }
