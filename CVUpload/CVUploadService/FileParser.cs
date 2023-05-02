@@ -866,17 +866,17 @@ namespace CVUploadService
             try
             {
 
-                if (Path.GetExtension(key) == ".csv")
+                if (Path.GetExtension(key) == ".csv"|| Path.GetExtension(key) == ".txt")
                 {
                     //return CSVToDataTable(UploadQueue + key);
 
                     //dt = CSVtoDataTable(UploadQueue + key);
-                    dt = GetDataTableFromCSVFile(UploadQueue + key);
+                    dt = GetDataTableFromCSVFile(value);
                     foreach (DataColumn col in dt.Columns)
                     {
                         col.ColumnName = col.ColumnName.Trim();
                     }
-                    value.Close();
+                    //alue.Close();
                     return dt;
                 }
                 else if (Path.GetExtension(key) == ".xlsx" || Path.GetExtension(key) == ".xls")
@@ -892,7 +892,7 @@ namespace CVUploadService
                         {
                             col.ColumnName = col.ColumnName.Trim();
                         }
-                        value.Close();
+                        //value.Close();
                         return dt;
 
                     }
@@ -929,40 +929,67 @@ namespace CVUploadService
             {
                 //_logger.Log("Bad File: " + ex.Message.ToString(), @"" + UploadLogFile.Replace("DDMMYY", DateTime.Now.ToString("ddMMyy")));
                 log.PushLog("Bad File " + ex.Message + ex.InnerException, "Bad File");
-                value.Close();
+                //value.Close();
                 return dt = null;
             }
 
         }
-        private static DataTable GetDataTableFromCSVFile(string filePath)
+        private  DataTable GetDataTableFromCSVFile(Stream value)
         {
+            DataTable dataTable = new DataTable();
+
             try
             {
-                DataTable dataTable = new DataTable();
-                using (StreamReader sr = new StreamReader(filePath))
+
+                using (var reader = new StreamReader(value))
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
                 {
-                    string[] headers = sr.ReadLine().Split(',');
-                    foreach (string header in headers)
+                    using (var dr = new CsvDataReader(csv))
                     {
-                        dataTable.Columns.Add(header);
-                    }
-                    while (!sr.EndOfStream)
-                    {
-                        string[] rows = sr.ReadLine().Split(',');
-                        DataRow dr = dataTable.NewRow();
-                        for (int i = 0; i < headers.Length; i++)
-                        {
-                            dr[i] = rows[i];
-                        }
-                        dataTable.Rows.Add(dr);
+                        dataTable.Load(dr);
                     }
                 }
                 return dataTable;
             }
             catch (Exception ex)
             {
-                throw ex;
+           
+                log.PushLog("GetDataTableFromCSVFile " + ex.Message + ex.InnerException, "GetDataTableFromCSVFile");
+                return dataTable;
             }
+          
+
+
+
+            //try
+            //{
+                
+            //    using (StreamReader sr = new StreamReader(filePath))
+            //    {
+            //        string[] headers = sr.ReadLine().Split(',');
+            //        foreach (string header in headers)
+            //        {
+            //            dataTable.Columns.Add(header);
+            //        }
+            //        while (!sr.EndOfStream)
+            //        {
+            //            string[] rows = sr.ReadLine().Split(',');
+            //            DataRow dr = dataTable.NewRow();
+            //            for (int i = 0; i < headers.Length; i++)
+            //            {
+            //                dr[i] = rows[i];
+            //            }
+            //            dataTable.Rows.Add(dr);
+            //        }
+            //    }
+
+            //    return dataTable;
+            //}
+            //catch (Exception ex)
+            //{
+            //    log.PushLog("GetDataTableFromCSVFile " + ex.Message + ex.InnerException, "GetDataTableFromCSVFile");
+            //    return dataTable;
+            //}
 
         }
 
