@@ -115,4 +115,3 @@ D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\Newtonsoft.Jso
 D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\log4net.dll
 D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Debug\log4net.xml
 D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.Installer1.resources
-D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\obj\Debug\CVUploadService.csproj.AssemblyReference.cache

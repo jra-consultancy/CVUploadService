@@ -58,8 +58,6 @@ D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\bin\Release\System.Memor
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\bin\Release\System.Numerics.Vectors.xml
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\bin\Release\System.Runtime.CompilerServices.Unsafe.xml
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\bin\Release\System.Threading.Tasks.Extensions.xml
-D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.csproj.AssemblyReference.cache
-D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.csproj.SuggestedBindingRedirects.cache
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.CVUploadService.resources
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.ProjectInstaller.resources
 D:\Upwork\Andy\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.csproj.GenerateResource.cache
@@ -101,3 +99,13 @@ E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadSe
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.exe
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.pdb
 E:\work\Projects\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.csprojAssemblyReference.cache
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Release\ExcelDataReader.DataSet.dll
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Release\ExcelDataReader.dll
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Release\log4net.dll
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Release\Newtonsoft.Json.dll
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Release\ExcelDataReader.xml
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Release\ExcelDataReader.DataSet.xml
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Release\log4net.xml
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\bin\Release\Newtonsoft.Json.xml
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.Installer1.resources
+D:\UPWORK\ANDY\CVUploadService\CVUpload\CVUploadService\obj\Release\CVUploadService.csproj.AssemblyReference.cache

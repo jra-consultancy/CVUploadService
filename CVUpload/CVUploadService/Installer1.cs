@@ -26,7 +26,8 @@ namespace CVUploadService
         protected override void OnAfterInstall(IDictionary savedState)
         {
             base.OnAfterInstall(savedState);
-            ModifyConnectionString();
+            try { ModifyConnectionString(); }
+            catch { }
         }
 
         void ModifyConnectionString()
